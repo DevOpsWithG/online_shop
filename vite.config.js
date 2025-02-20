@@ -7,5 +7,8 @@ export default defineConfig({
     base: './',
     css: {
       devSourcemap: false
-    }
-})
+    },
+    server: {
+      port: 3000 // Changing default port of application
+  }
+});
