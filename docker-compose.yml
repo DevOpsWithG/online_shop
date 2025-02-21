@@ -1,0 +1,13 @@
+version: "3.9"
+services:         
+  online_shop:            
+    image: online-shop:v1.0.4
+    container_name: online-shop-container
+    ports:
+      - "3000:3000"                      
+    healthcheck:                 
+      test: ["CMD", "curl", "-f", "http://localhost:3000/"]  
+      interval: 20s         
+      timeout: 10s                 
+      retries: 5
+
