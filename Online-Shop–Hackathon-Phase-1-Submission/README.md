@@ -76,4 +76,26 @@
 - Verified it by logging to docker hub
   ![image](https://github.com/user-attachments/assets/b1933a63-c5a5-4842-9b08-ae89fa3e97f0)
 
+### Continerized application using docker-compose.yaml
+- Created docekr compose file
+  ```
+  version: "3.9"
+  services:
+    online_shop:
+      image: online-shop:v1.0.4
+      container_name: online-shop-container
+      ports:
+        - "3000:3000"
+      healthcheck:
+        test: ["CMD", "curl", "-vlk", "http://localhost:3000/"]
+        interval: 20s
+        timeout: 10s
+        retries: 5
+  ```
+- Command used to containerise application
+  ```
+  docker-compose up -d
+  docker-compose down
+  ```
+### Demo video added in solution folder
 ### Continuing Learning with Shubham Bhaiya! . . .
