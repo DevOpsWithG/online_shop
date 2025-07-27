@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: myapp
-          image: docker.io/ganesh511/myapp:latest
+          image: docker.io/ganesh51/online-shop:latest
           ports:
             - containerPort: 3000
       imagePullSecrets:
