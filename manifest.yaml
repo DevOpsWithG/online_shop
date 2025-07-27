@@ -17,6 +17,8 @@ spec:
           image: docker.io/ganesh511/myapp:latest
           ports:
             - containerPort: 3000
+      imagePullSecrets:
+        - name: regcred
 ---
 apiVersion: v1
 kind: Service
