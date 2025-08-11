@@ -1,45 +1,90 @@
-pipeline{
-    agent any;
+pipeline {
+    agent any
     
-    stages{
-        stage('checkout'){
-            steps{
-                echo "git clone"
-                git url:"https://github.com/DevOpsWithG/online_shop.git", branch:"Hackathon"
+    /*tools {
+       nodejs "NodeJS24"
+    }*/
+  
+    
+    stages {
+        stage ("checkout"){
+            steps {
+                cleanWs()
+                git url: "https://github.com/DevOpsWithG/online_shop.git", branch: "Hackathon"
             }
         }
-        stage('Build'){
-            steps{
-                echo "build code"
-                //sh " docker build -t online-shop-${BUILD_NUMBER} ."
+        /*stage ("Code Build"){
+            steps {
+                sh '''
+                npm install 
+                npm run build
+                '''
+                
+            }
+        }*/
+        /*stage ("Static Code Analysis"){
+            steps {
+                sh '''
+                npx eslint --max-warnings 0
+                '''
+            }
+        }*/
+        /*stage ("Unit Tests"){
+            //There should test script in code to run this stage
+            steps {
+                sh '''
+                npm test -- --coverage  
+                '''
+                
+            }
+        }*/
+        /*stage ("Security Scan"){
+            steps {
+                sh '''
+                npm audit fix
+                npm audit --audit-level=high
+                
+                '''
+                
+            }
+        }*/
+        stage ("Docker Build"){
+            steps {
+                sh '''
+                docker build -t ganesh51/online-shop:latest .
+                '''
             }
         }
-        stage('test'){
-            steps{
-                echo "test code"
+        /*stage ("Image Scan"){
+            steps { 
+                sh '''
+                trivy image --exit-code 1 --severity HIGH,CRITICAL ganesh51/online-shop:v1.0.$BUILD_NUMBER
+                '''
             }
-        }
-        stage('Push'){
-            steps{
-                echo "Push image"
-                withCredentials([usernamePassword(
-                    credentialsId: "dockerhub-creds", 
-                    passwordVariable: "dockerhubPass", 
-                    usernameVariable: "dockerhubUser")]){
-                    
-                    sh "docker login -u ${env.dockerhubUser} -p ${env.dockerhubPass}"
-                    sh "docker images"
-                    // sh "docker tag"
-                    //sh "docker push"
+        }*/
+        stage ("Docker Push"){
+            steps {
+                
+                withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh 'echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin'
+                    sh 'docker push ganesh51/online-shop:latest'
                 }
+                
             }
         }
-        stage('Deploy'){
-            steps{
-                echo "deploy code"
+        stage('Deploy to GKE') {
+            steps {
+                 withCredentials([file(credentialsId: 'gcp-sa-key', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
+                     sh '''
+                     gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
+                     gcloud config set project integral-nimbus-461213-u7
+                     gcloud container clusters get-credentials autopilot-cluster --region us-central1
+
+                     kubectl apply -f manifest.yaml
+                     '''
+                 }
             }
         }
-        
         
     }
 }
